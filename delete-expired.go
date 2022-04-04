@@ -55,10 +55,12 @@ func DeleteHandler(ctx context.Context) (*Response, error) {
 				SnapshotId: snapshot.Id,
 			}))
 			if err != nil {
+				fmt.Println("Error: ", err.Error())
 				return nil, err
 			}
 			meta, err := op.Metadata()
 			if err != nil {
+				fmt.Println("Error: ", err.Error())
 				return nil, err
 			}
 			deletedIds = append(deletedIds, meta.(*compute.DeleteSnapshotMetadata).GetSnapshotId())
