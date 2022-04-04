@@ -21,6 +21,9 @@
 <img src="assets/cleanup.png" width="232px" alt="cleanup snapshots diagram">
 
 ### Deploy
+
+Нужно обязательно заполнить поле name у диска на который установили label для snapshot!!!
+
 #### MacOs (Linux)
 Предполагается что у вас уже настроены [yc](https://cloud.yandex.ru/docs/cli/quickstart) и [s3cmd](https://cloud.yandex.ru/docs/storage/instruments/s3cmd). Они понадобятся для скрипта деплоя.
 
