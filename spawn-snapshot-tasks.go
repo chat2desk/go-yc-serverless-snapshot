@@ -41,6 +41,7 @@ func SpawnHandler(ctx context.Context) (*Response, error) {
 		Credentials: ycsdk.InstanceServiceAccount(),
 	})
 	if err != nil {
+		fmt.Println("Error: ", err.Error())
 		return nil, err
 	}
 
@@ -82,7 +83,7 @@ func SpawnHandler(ctx context.Context) (*Response, error) {
 		// Отправляем в Yandex Message Queue сообщение с праметрами какой диск нужно снепшотить
 		_, err = svc.SendMessage(params)
 		if err != nil {
-			fmt.Println("Error", err)
+			fmt.Println("Error: ", err.Error())
 			return nil, err
 		}
 		diskIds = append(diskIds, d.Id)
