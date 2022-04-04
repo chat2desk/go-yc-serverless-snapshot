@@ -21,13 +21,17 @@ func SnapshotHandler(ctx context.Context, event MessageQueueEvent) (*Response, e
 		// при помощи него данные для авторизации в SDK
 		Credentials: ycsdk.InstanceServiceAccount(),
 	})
+
 	if err != nil {
+		fmt.Println("Error: ", err.Error())
 		return nil, err
 	}
+
 	now := time.Now()
 	// Получаем значение периода жизни снепшота из переменной окружения
 	ttl, err := strconv.Atoi(os.Getenv("TTL"))
 	if err != nil {
+		fmt.Println("Error: ", err.Error())
 		return nil, err
 	}
 
@@ -38,10 +42,12 @@ func SnapshotHandler(ctx context.Context, event MessageQueueEvent) (*Response, e
 	body := event.Messages[0].Details.Message.Body
 	createSnapshotParams := &CreateSnapshotParams{}
 	err = json.Unmarshal([]byte(body), createSnapshotParams)
+
 	if err != nil {
+		fmt.Println("Error: ", err.Error())
 		return nil, err
 	}
-	
+
 	// Генерируем Name для снепшота
 	// Значение не может быть длиннее 63 символов
 	snapshotName := "snapshot" + "-" + expirationTs + "-" + createSnapshotParams.DiskName 
@@ -53,9 +59,12 @@ func SnapshotHandler(ctx context.Context, event MessageQueueEvent) (*Response, e
 	
 	// Генерируем Description для снепшота
 	i, err := strconv.ParseInt(expirationTs, 10, 64)
+
 	if err != nil {
+		fmt.Println("Error: ", err.Error())
 		return nil, err
 	}
+
 	tm := time.Unix(i, 0)
 	snapshotDescription := fmt.Sprintf("Expiration:  %s", tm)
 
@@ -70,9 +79,16 @@ func SnapshotHandler(ctx context.Context, event MessageQueueEvent) (*Response, e
 			"expiration_ts": expirationTs,
 		},
 	}))
-	if err != nil {
-		return nil, err
+
+    if err != nil {
+		fmt.Println("Error: ", err.Error())
+
+		return &Response{
+			StatusCode: 200,
+			Body: "Error create snapshot",
+		}, nil
 	}
+
 	// Если снепшот по каким-то причинам создать не удалось, сообщение вернется в очередь. После этого триггер
 	// снова возьмет его из очереди, вызовет эту функцию снова и будет сделана еще одна попытка его создать.
 	if opErr := snapshotOp.Error(); opErr != nil {
@@ -83,8 +99,10 @@ func SnapshotHandler(ctx context.Context, event MessageQueueEvent) (*Response, e
 	}
 	meta, err := snapshotOp.Metadata()
 	if err != nil {
+		fmt.Println("Error: ", err.Error())
 		return nil, err
 	}
+
 	meta.(*compute.CreateSnapshotMetadata).GetSnapshotId()
 	return &Response{
 		StatusCode: 200,
